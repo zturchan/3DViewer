@@ -5,6 +5,7 @@
  */
 
 import java.applet.Applet;
+import java.awt.Button;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
@@ -13,6 +14,8 @@ import java.awt.GridBagLayout;
 import java.awt.Label;
 import java.awt.Panel;
 import java.awt.Scrollbar;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.media.j3d.AmbientLight;
 import javax.media.j3d.BoundingSphere;
@@ -20,9 +23,9 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.swing.JFileChooser;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3f;
 
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
@@ -34,7 +37,8 @@ public class Viewer extends Applet {
 	SimpleUniverse simpleU; 
 	static boolean application = false;
 	public static boolean debug = true;
-	String filename = "newbunny.obj";
+	public static Frame frame;
+	private static String filename = "newbunny.obj";
 	// 3D Canvas
 	Canvas3D           canvas;
 
@@ -43,7 +47,13 @@ public class Viewer extends Applet {
 	Panel              canvasPanel;
 	Scrollbar          disSlider;
 	Label              disLabel;
-	public Viewer (){    
+	
+	public static void setFile(String in){
+		filename = in;
+	}
+	
+	public Viewer (String name){
+		setFile(name);
 	}    
 
 	public void init() { 
@@ -107,7 +117,7 @@ public class Viewer extends Applet {
 			}
 			else {
 				s = f.load (filename);
-				debug("LOADED FILE");
+				debug("LOADED FILE: " + filename);
 
 				tg.addChild (s.getSceneGroup ());
 				debug("ADDED CHILD");
@@ -166,7 +176,8 @@ public class Viewer extends Applet {
 		p.setLayout (gl);
 		gbc.weightx = 100;  gbc.weighty = 100;
 		gbc.fill = GridBagConstraints.BOTH;
-
+		
+		
 		// The slider
 		gbc.gridx = 0;  gbc.gridy = 0;
 		gbc.gridwidth = 5;  gbc.gridheight = 1;
@@ -174,11 +185,21 @@ public class Viewer extends Applet {
 		disSlider.setUnitIncrement(1);
 		p.add(disSlider, gbc);
 
-		// The lable
+		// The label
 		gbc.gridx = 0;  gbc.gridy = 1;
 		gbc.gridwidth = 5;  gbc.gridheight = 1;
 		disLabel = new Label("+  Distance  -", Label.CENTER);
 		p.add(disLabel, gbc);
+		
+		//The button to open a file
+		Button opener;
+		OpenListener openListener = new OpenListener(this);
+		gbc.gridx = 0;  gbc.gridy = 2;
+		gbc.gridwidth = 5; gbc.gridheight = 1;
+		opener = new Button("Open");
+		opener.setActionCommand("Open");
+		opener.addActionListener(openListener);
+		p.add(opener, gbc);
 	}
 
 	/*
@@ -191,8 +212,7 @@ public class Viewer extends Applet {
 		p.setLayout(gl);
 		gbc.gridx = 0;  gbc.gridy = 0;
 		gbc.gridwidth = 5;  gbc.gridheight = 5;
-		GraphicsConfiguration config =
-				SimpleUniverse.getPreferredConfiguration();
+		GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
 
 		canvas = new Canvas3D(config);
 		canvas.setSize(230,210);
@@ -203,12 +223,16 @@ public class Viewer extends Applet {
 
 	public static void main(String[] args) {
 		application = true;    
-		Frame frame = new MainFrame(new Viewer(), 500, 220);    
+		setFrame(new MainFrame(new Viewer("newbunny.obj"), 500, 220));    
 	}
 
 	public static void debug(String msg){
 		if (debug){
 			System.out.println(msg);
 		}
+	}
+	
+	public static void setFrame(MainFrame f){
+		frame = f;
 	}
 }
